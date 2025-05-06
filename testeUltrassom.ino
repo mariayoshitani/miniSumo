@@ -1,6 +1,8 @@
 #include "Motor.h"
 #include <HCSR04.h>
 
+Motor Motor1, Motor2;
+
 void setup() {
   Serial.begin(9600); // comunicação com motor serial para impressão dos valores lidos pelo ultra
   Motor1.setPinos(5, 6); // entradas 5 e 6 para motor 1
