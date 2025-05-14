@@ -55,7 +55,7 @@ class Motor{
 
   Motor Motor1, Motor2;
   HCSR04 Ultra1(TRIGGER1, ECHO1);
-  //Ultra2(TRIGGER2, ECHO2);
+  HCSR04 Ultra2(TRIGGER2, ECHO2);
 
 void setup() {
   Serial.begin(9600);
@@ -68,22 +68,25 @@ void setup() {
 }
 
 void loop() {
-  long distancia1 = Ultra1.dist();
-  Serial.print(distancia1); //imprime o valor da variável distancia
+  
+  long dist1 = Ultra1.dist();
+  Serial.print(dist1); //imprime o valor da variável distancia
   Serial.println("cm");
-  /*
-  long distancia2 = Ultra2.dist();
-  Serial.print(distancia2); //imprime o valor da variável distancia2
-  Serial.println("cm");
-*/
 
-  if (distancia1 <= 5.00) { // se distancia menor ou igual a 5, motores avanca
-    Motor1.avanca(10);
-    Motor2.avanca(10);
-    
-  } else { // senão, velocidade aumenta conforme proximidade
-    Motor1.re(10);
-    Motor2.re(10);
+  long dist2 = Ultra2.dist();
+  Serial.print(dist2); //imprime o valor da variável distancia2
+  Serial.println("cm");
+
+  if ((dist1 != 0) && (dist2 != 0)) {
+    if ((dist1 > 5) || (dist2 > 5)) { // se distancia maior que 5, motores avanca
+      Motor1.avanca(10);
+      Motor2.avanca(10);
+      
+    } else { // senão, velocidade aumenta conforme proximidade
+      Motor1.re(10);
+      Motor2.re(10);
+    }
   }
+
 
 }

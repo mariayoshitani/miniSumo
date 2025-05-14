@@ -58,14 +58,14 @@ void setup() {
 
 void loop() {
   long lumi1 = analogRead(INFRA1); // le a luminosidade pela entrada analógica
-  long lumi2 = analogRead(INFRA2);
+  // long lumi2 = analogRead(INFRA2);
   Serial.println(lumi1); //imprime o valor da variável lumi1
-  Serial.println(lumi2); //imprime o valor da variável lumi2
+  // Serial.println(lumi2); //imprime o valor da variável lumi2
 
-  if ((lumi1 < BRANCO) || (lumi2 < BRANCO)) { // se branco, motores avancam a 10% da velocidade máxima
+  if (lumi1 < BRANCO) { 
     Motor1.re(10);
     Motor2.re(10);
-  } else { // senão, motores giram no sentido "ré" na mesma velocidade
+  } else { 
     Motor1.avanca(10);
     Motor2.avanca(10);
   }

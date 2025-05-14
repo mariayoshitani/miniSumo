@@ -75,22 +75,23 @@ void loop()
     // MOTOR1
     // se objeto a menos de 5 cm, ré
     // senão, para frente
-    long distancia1 = Ultra1.dist();
-    Serial.print(distancia1); // imprime o valor da dist lida pelo ultra1
+    long dist1 = Ultra1.dist();
+    Serial.print(dist1); // imprime o valor da dist lida pelo ultra1
     Serial.println("cm");
 
-    long distancia2 = Ultra2.dist();
-    Serial.print(distancia2); // imprime o valor da dist lida pelo ultra1
+    long dist2 = Ultra2.dist();
+    Serial.print(dist2); // imprime o valor da dist lida pelo ultra1
     Serial.println("cm");
 
-    if (distancia1 <= 5.00)
-    { // se distancia menor ou igual a 5, motor1 avanca
-        Motor1.avanca(10);
+    if ((dist1 != 0) && (dist2 != 0)) {
+        if ((dist1 > 5) && (dist2 > 5)) { // se distancia maior que 5, motor1 avanca
+            Motor1.avanca(10);
+      
+        } else { 
+            Motor1.re(10);
+        }
     }
-    else
-    { // senão, motor1 dá ré
-        Motor1.re(10);
-    }
+
 
     // código infra
     // MOTOR2
@@ -103,10 +104,11 @@ void loop()
 
     if ((lumi1 < BRANCO) || (lumi2 < BRANCO))
     { // se branco, motor2 dá ré a 10% da velocidade máxima
-        Motor2.re(10);
+        Motor2.avanca(10);
     }
     else
     { // senão, motor2 avança
-        Motor2.avanca(10);
+        Motor2.re(10);
     }
+
 }
