@@ -1,22 +1,22 @@
 #include <HCSR04.h>
 
-#define MOTOR_ESQ_PINO1 5  // 5: amarelo
-#define MOTOR_ESQ_PINO2 6  // 6: laranja
-#define MOTOR_DIR_PINO1 10 // 10: azul
-#define MOTOR_DIR_PINO2 11 // 11: verde
+#define MOTOR_ESQ_PINO1 5 
+#define MOTOR_ESQ_PINO2 6  
+#define MOTOR_DIR_PINO1 3 
+#define MOTOR_DIR_PINO2 11
 
-#define TRIGGER_ESQ 3
-#define ECHO_ESQ 4
+#define TRIGGER_ESQ 12
+#define ECHO_ESQ 9
 #define TRIGGER_DIR 7
 #define ECHO_DIR 8
 
 #define INFRA_ESQ A4
 #define INFRA_DIR A5
 
-#define BRANCO 100
-#define DIST_OPONENTE 50
-#define TEMPO_RE 200
-#define TEMPO_GIRO 200
+#define BRANCO 150
+#define DIST_OPONENTE 60
+#define VEL_MIN 20
+#define VEL_MAX 60
 
 class Motor 
 {
@@ -65,12 +65,6 @@ public:
 Motor MotorEsq, MotorDir;
 HCSR04 UltraEsq(TRIGGER_ESQ, ECHO_ESQ), UltraDir(TRIGGER_DIR, ECHO_DIR);
 
-// Variáveis para uso do millis(), para não usar delay()
-unsigned long tempoRe = 0;
-unsigned long tempoGiro = 0;
-bool re = false;
-bool girando = false;
-
 void setup()
 {
     Serial.begin(9600);
@@ -95,62 +89,49 @@ void loop() {
     // se linha branca
     if (linhaEsq || linhaDir) {
 
-        // se não estiver dando ré nem girando
-        if (!re || !girando) {
+        // dá ré
+        MotorEsq.re(25);
+        MotorDir.re(25);
 
-            // dá ré
-            MotorEsq.re(100);
-            MotorDir.re(100);
-            re = true;
-            tempoRe = millis(); // tempo para ré
-        }
-    }
-
-    // se estiver dando ré, verifica se o tempo já passou de TEMPO_RE
-    if (re && (millis() - tempoRe >= TEMPO_RE)) {
-        re = false;
+        delay(500);
+        
         if (linhaEsq) { // Gira para direita
-            MotorEsq.avanca(100);
-            MotorDir.re(100);
+            MotorEsq.avanca(25);
+            MotorDir.re(25); 
 
         } else if (linhaDir) { // Gira para esquerda
-            MotorEsq.re(100);
-            MotorDir.avanca(100);
+            MotorEsq.re(25); 
+            MotorDir.avanca(25);
         }
-        girando = true;
-        tempoGiro = millis();
+        delay (500);
+
     }
-  
-    // Se estiver girando, verifica se já terminou o tempo
-    if (girando && (millis() - tempoGiro >= TEMPO_GIRO)) {
-        girando = false;
-        MotorEsq.freio();
-        MotorDir.freio();
-     }
-  
+
+
     // Se não estiver recuando nem girando, procura oponente
     // Verifica se algum dos ultra leu 0
-    if ((!re && !girando) && (distDir && distEsq)) {
+
+    if (distEsq && distDir) {
         if (distEsq <= DIST_OPONENTE || distDir <= DIST_OPONENTE) {
-            if (distEsq < distDir) { // Oponente à esquerda
-                MotorEsq.avanca(60);
-                MotorDir.avanca(100);
-
-            } else if (distDir < distEsq) { // Oponente à direita
-                MotorEsq.avanca(100);
-                MotorDir.avanca(60);
-
-            } else { // Oponente à frente
-                MotorEsq.avanca(100);
-                MotorDir.avanca(100);
-            }
+            
+            MotorEsq.avanca(map(distDir, DIST_OPONENTE, 1, VEL_MIN, VEL_MAX)); //quanto mais perto pela direita, motor esq vai mais rápido
+            MotorDir.avanca(map(distEsq, DIST_OPONENTE, 1, VEL_MIN, VEL_MAX)); // //quanto mais perto pela esquerda, motor dir vai mais rápido
         }
+    } else if (distEsq && ((distEsq <= DIST_OPONENTE))) {
+        // se distEsq é valida e menor ou igual a DIST_OPONENTE, vai reto
+        MotorEsq.avanca(map(distEsq, DIST_OPONENTE, 1, VEL_MIN, VEL_MAX));
+        MotorDir.avanca(map(distEsq, DIST_OPONENTE, 1, VEL_MIN, VEL_MAX));
 
-    // oponente não detectado
+    } else if (distDir && ((distDir<= DIST_OPONENTE))) {
+        // se distDir é valida e menor ou igual a DIST_OPONENTE, vai reto
+        MotorEsq.avanca(map(distDir, DIST_OPONENTE, 1, VEL_MIN, VEL_MAX));
+        MotorDir.avanca(map(distDir, DIST_OPONENTE, 1, VEL_MIN, VEL_MAX));
+
     } else {
-        // gira no próprio eixo devagar
-        MotorEsq.avanca(40);
-        MotorDir.re(40);
+        // se as duas distâncias não são válidas ou se são maiores que DIST_OPONENTE
+        // procura girando proprio eixo
+        MotorEsq.avanca(VEL_MIN);
+        MotorDir.re(VEL_MIN);
+    }  
 
-    }   
 }

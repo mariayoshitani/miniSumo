@@ -1,12 +1,12 @@
-#define BRANCO 100
+#define BRANCO 150
 
-#define INFRA1 A4
-#define INFRA2 A5
+#define INFRA_DIR A4 // direita
+#define INFRA_ESQ A5 // esquerda
 
 #define M1_PINO1 5   //5: amarelo
 #define M1_PINO2 6   //6: laranja
 
-#define M2_PINO1 10   //10: azul
+#define M2_PINO1 3   //10: azul
 #define M2_PINO2 11   //11: verde
 
 class Motor{
@@ -57,16 +57,17 @@ void setup() {
 }
 
 void loop() {
-  long lumi1 = analogRead(INFRA1); // le a luminosidade pela entrada analógica
-  // long lumi2 = analogRead(INFRA2);
-  Serial.println(lumi1); //imprime o valor da variável lumi1
-  // Serial.println(lumi2); //imprime o valor da variável lumi2
+  long lumiDir = analogRead(INFRA_DIR);
+  long lumiEsq = analogRead(INFRA_ESQ);
+  //Serial.println(lumiDir); 
+  Serial.println(lumiEsq); 
 
-  if (lumi1 < BRANCO) { 
-    Motor1.re(10);
-    Motor2.re(10);
+  // se um dos sensores ler  branco, dá ré
+  if ((lumiEsq < BRANCO) && (lumiDir < BRANCO)) { 
+    Motor1.re(15);
+    Motor2.re(15);
   } else { 
-    Motor1.avanca(10);
-    Motor2.avanca(10);
+    Motor1.avanca(15);
+    Motor2.avanca(15);
   }
 }
